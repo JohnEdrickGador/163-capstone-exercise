@@ -3,6 +3,9 @@ use image::{DynamicImage, GenericImage};
 use crate::primitives::{Point3, Ray};
 use super::{Scene, intersect_scene_from_view, get_color, get_color_recursive};
 
+use rayon::prelude::*;
+use std::sync::Mutex;
+
 fn make_ray(scene: &Scene, pixel_coords: (usize, usize)) -> Ray {
     // Create coordinate frame
     let w = (scene.camera.eye - &scene.camera.center).norm();
@@ -25,8 +28,10 @@ pub fn render(scene: &Scene) -> Vec <u8> {
     let mut pixels: Vec <u8> = Vec::new();
     pixels.resize(scene.img_width * scene.img_height * 3, 0u8);
 
-    for i in 0..scene.img_height {
-        for j in 0..scene.img_width {
+    let pixels_mutex = Mutex::new(pixels);
+
+    (0..scene.img_height).into_par_iter().for_each(|i| {
+        (0..scene.img_width).into_par_iter().for_each(|j| {
             // Pass through ray in center of (i, j) pixel
             let ray = make_ray(scene, (i, j));
             let start_idx = (i * scene.img_width + j) * 3;
@@ -35,6 +40,8 @@ pub fn render(scene: &Scene) -> Vec <u8> {
             if let Some(id) = intersect_scene_from_view(ray, scene) {
                 // Use get_color_recursive to get reflections
                 //let pix_color = get_color(ray, scene, id, &scene.lights);
+                let mut pixels = pixels_mutex.lock().unwrap();
+
                 let pix_color = get_color_recursive(ray, &scene, id, 0);
                 
                 pixels[start_idx + 0] = (255.0 * pix_color[0]) as u8;
@@ -43,13 +50,16 @@ pub fn render(scene: &Scene) -> Vec <u8> {
             }
             else {
                 // Color all pixels black
+                let mut pixels = pixels_mutex.lock().unwrap();
+
                 pixels[start_idx + 0] = 0u8;
                 pixels[start_idx + 1] = 0u8;
                 pixels[start_idx + 2] = 0u8;
             }
-        }
-    }
+        });
+    });
 
+    let pixels = pixels_mutex.lock().unwrap().to_owned();
     pixels
 }
 
@@ -64,14 +74,19 @@ pub fn build_image(image_dim: (usize, usize), pixels: &Vec <u8>) -> DynamicImage
 
     let mut image = DynamicImage::new_rgb8(image_dim.0 as u32, image_dim.1 as u32);
 
+    let image_mutex = Mutex::new(image);
+
     // Write in column major (height, then width)
-    for y in 0..image_dim.1 {
-        for x in 0..image_dim.0 {
+    (0..image_dim.1).into_par_iter().for_each(|y| {
+        (0..image_dim.0).into_par_iter().for_each(|x| {
             let start_idx = (y * image_dim.0 + x) * 3;
 
-            image.put_pixel(x as u32, y as u32, image::Rgba([pixels[start_idx], pixels[start_idx + 1], pixels[start_idx + 2], 0]));
-        }
-    }
+            let mut image = image_mutex.lock().unwrap();
 
+            image.put_pixel(x as u32, y as u32, image::Rgba([pixels[start_idx], pixels[start_idx + 1], pixels[start_idx + 2], 0]));
+        });
+    });
+
+    let image = image_mutex.lock().unwrap().to_owned();
     image
 }
