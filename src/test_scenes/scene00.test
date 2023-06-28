@@ -1,0 +1,17 @@
+# size width height
+size 100 100
+
+# camera eye[0..3] center[0..3] up[0..3] fovy
+camera 0 0 0 0 0 -1 0 1 0 30
+
+pushTransform
+ambient 1 0 0
+
+# translate x y z
+translate -0.25 0.25 -0.25
+
+# scale x y z
+scale 2 1 1
+
+
+sphere 0 0 -3 0.25
