@@ -29,14 +29,16 @@ impl Point3 {
     }
 }
 
-impl ops::Add <&Point3> for Point3 {
+impl ops::Add<&Point3> for Point3 {
     type Output = Vector3;
 
     fn add(self, other: &Point3) -> Vector3 {
-        let ans: Vec <f64> = self.point.into_iter().zip(other.point).map(|elm| elm.0 + elm.1).collect();
-        
         Vector3 {
-            vec: [ans[0], ans[1], ans[2]],
+            vec: [
+                self.point[0] + other.point[0],
+                self.point[1] + other.point[1],
+                self.point[2] + other.point[2],
+            ],
         }
     }
 }
@@ -69,13 +71,17 @@ impl ops::Sub <&Vector3> for Point3 {
     }
 }
 
-impl ops::Mul <f64> for Point3 {
+impl ops::Mul<f64> for Point3 {
     type Output = Point3;
 
     fn mul(self, other: f64) -> Point3 {
-        Self {
-            point: self.point.map(|elm| elm * other),
+        let mut point = [0.0; 3];
+
+        for i in 0..3 {
+            point[i] = self.point[i] * other;
         }
+
+        Point3 { point }
     }
 }
 

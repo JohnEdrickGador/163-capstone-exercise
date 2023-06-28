@@ -23,11 +23,15 @@ impl Vector3 {
 
 impl Vector3 {
     pub fn dot(self, other: &Vector3) -> f64 {
-        self.vec.into_iter().zip(other.vec).fold(0_f64, |acc, elm| acc + (elm.0 * elm.1))
+        let mut result = 0.0;
+        for i in 0..3 {
+            result += self.vec[i] * other.vec[i];
+        }
+        result
     }
 
     pub fn cross(self, other: &Vector3) -> Vector3 {
-        Self {
+        Vector3 {
             vec: [
                 self.vec[1] * other.vec[2] - self.vec[2] * other.vec[1],
                 self.vec[2] * other.vec[0] - self.vec[0] * other.vec[2],
@@ -37,26 +41,35 @@ impl Vector3 {
     }
 
     pub fn len(&self) -> f64 {
-        *(&self.dot(&self).sqrt())
+        let mut result = 0.0;
+        for i in 0..3 {
+            result += self.vec[i] * self.vec[i];
+        }
+        result.sqrt()
     }
 
     pub fn norm(&self) -> Vector3 {
         let vec_len = self.len();
-
-        Self {
-            vec: self.vec.map(|elm| elm / vec_len)
+        let mut normalized = Vector3 {
+            vec: [0.0; 3],
+        };
+        for i in 0..3 {
+            normalized.vec[i] = self.vec[i] / vec_len;
         }
+        normalized
     }
 }
 
-impl ops::Add <&Vector3> for Vector3 {
+impl ops::Add<&Vector3> for Vector3 {
     type Output = Vector3;
 
     fn add(self, other: &Vector3) -> Vector3 {
-        let ans: Vec <f64> = self.vec.into_iter().zip(other.vec).map(|elm| elm.0 + elm.1).collect();
-        
-        Self {
-            vec: [ans[0], ans[1], ans[2]],
+        Vector3 {
+            vec: [
+                self.vec[0] + other.vec[0],
+                self.vec[1] + other.vec[1],
+                self.vec[2] + other.vec[2],
+            ],
         }
     }
 }
@@ -69,24 +82,30 @@ impl ops::Sub <&Vector3> for Vector3 {
     }
 }
 
-impl ops::Mul <&Vector3> for Vector3 {
+impl ops::Mul<&Vector3> for Vector3 {
     type Output = Vector3;
 
     fn mul(self, other: &Vector3) -> Vector3 {
-        let ans: Vec <f64> = self.vec.into_iter().zip(other.vec).map(|elm| elm.0 * elm.1).collect();
-        
-        Self {
-            vec: [ans[0], ans[1], ans[2]],
+        Vector3 {
+            vec: [
+                self.vec[0] * other.vec[0],
+                self.vec[1] * other.vec[1],
+                self.vec[2] * other.vec[2],
+            ],
         }
     }
 }
 
-impl ops::Mul <f64> for Vector3 {
+impl ops::Mul<f64> for Vector3 {
     type Output = Vector3;
 
     fn mul(self, other: f64) -> Vector3 {
-        Self {
-            vec: self.vec.map(|elm| elm * other),
+        Vector3 {
+            vec: [
+                self.vec[0] * other,
+                self.vec[1] * other,
+                self.vec[2] * other,
+            ],
         }
     }
 }
