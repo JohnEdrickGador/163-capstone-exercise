@@ -6,6 +6,8 @@ mod raytracer;
 use std::env;
 use primitives::{Vector3, Point3, Matrix4, Ray};
 
+use std::time::Instant;
+
 fn test1() {
     let mymat = Matrix4::new(
         2.0, 2.0, 3.0, 3.0,
@@ -37,6 +39,8 @@ fn test1() {
 }
 
 fn main() {
+    let start = Instant::now();
+
     let args: Vec <String> = env::args().collect();
 
     if args.len() < 2 {
@@ -58,5 +62,9 @@ fn main() {
     let img_obj = raytracer::build_image((scene.img_width, scene.img_height), &pixels);
     file_io::write_image(&"out.png".to_string(), img_obj);
 
+    let end = start.elapsed();
+
     println!("===== RENDERING DONE!!! =====");
+
+    println!("The code took {:?}", end);
 }
