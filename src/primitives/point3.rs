@@ -71,15 +71,15 @@ impl ops::Sub <&Vector3> for Point3 {
     }
 }
 
-impl ops::Mul<f64> for Point3 {
+impl std::ops::Mul<f64> for Point3 {
     type Output = Point3;
 
     fn mul(self, other: f64) -> Point3 {
-        let mut point = [0.0; 3];
-
-        for i in 0..3 {
-            point[i] = self.point[i] * other;
-        }
+        let point = [
+            self.point[0] * other,
+            self.point[1] * other,
+            self.point[2] * other,
+        ];
 
         Point3 { point }
     }

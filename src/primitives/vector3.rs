@@ -22,15 +22,15 @@ impl Vector3 {
 }
 
 impl Vector3 {
-    pub fn dot(self, other: &Vector3) -> f64 {
+    pub fn dot(&self, other: &Vector3) -> f64 {
         let mut result = 0.0;
-        for i in 0..3 {
-            result += self.vec[i] * other.vec[i];
-        }
+        result += self.vec[0] * other.vec[0];
+        result += self.vec[1] * other.vec[1];
+        result += self.vec[2] * other.vec[2];
         result
     }
 
-    pub fn cross(self, other: &Vector3) -> Vector3 {
+    pub fn cross(&self, other: &Vector3) -> Vector3 {
         Vector3 {
             vec: [
                 self.vec[1] * other.vec[2] - self.vec[2] * other.vec[1],
@@ -41,21 +41,21 @@ impl Vector3 {
     }
 
     pub fn len(&self) -> f64 {
-        let mut result = 0.0;
-        for i in 0..3 {
-            result += self.vec[i] * self.vec[i];
-        }
-        result.sqrt()
+        let squared_sum = self.vec[0] * self.vec[0]
+            + self.vec[1] * self.vec[1]
+            + self.vec[2] * self.vec[2];
+        squared_sum.sqrt()
     }
 
     pub fn norm(&self) -> Vector3 {
         let vec_len = self.len();
-        let mut normalized = Vector3 {
-            vec: [0.0; 3],
+        let normalized = Vector3 {
+            vec: [
+                self.vec[0] / vec_len,
+                self.vec[1] / vec_len,
+                self.vec[2] / vec_len,
+            ],
         };
-        for i in 0..3 {
-            normalized.vec[i] = self.vec[i] / vec_len;
-        }
         normalized
     }
 }
